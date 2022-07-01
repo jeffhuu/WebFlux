@@ -67,6 +67,16 @@ public class UserController {
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/age/{start}/{end}")
+    public Flux<User> findByAge(@PathVariable("start") int start, @PathVariable("end") int end) {
+        return userDao.findByAgeBetween(start, end);
+    }
+
+    @GetMapping(value = "/stream/age/{start}/{end}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<User> streamFindByAge(@PathVariable("start") int start, @PathVariable("end") int end) {
+        return userDao.findByAgeBetween(start, end);
+    }
+
     @GetMapping("/test")
     public Mono<Integer> test() {
         return Mono.just(1)
