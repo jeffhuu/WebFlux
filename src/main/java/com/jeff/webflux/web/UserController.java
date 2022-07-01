@@ -13,6 +13,8 @@ import reactor.core.publisher.Mono;
 /**
  * @program: WebFlux
  * @author: Jeff Hu 2022/06/29 18:05
+ *
+ * 传统 MVC 注解开发模式
  */
 @RestController
 @RequestMapping("/user")
