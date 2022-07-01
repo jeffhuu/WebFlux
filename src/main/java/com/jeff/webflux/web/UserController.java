@@ -37,7 +37,11 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteUser(@PathVariable String id) {
+        // deleteById 没有返回值，不能判断数据是否存在
         return userDao.findById(id)
+                // flapMap 和 map 的返回值都是 Momo，区别在于 flatMap 的函数式接口参数必须返回 Momo， 而 map 的参数只要求返回普通对象
+                // 当需要操作数据，并且参数 Function 返回一个 Momo 这个时候使用 flatMap，flatMap 会形成一个新的流
+                // 如果不操作数据，只是转换数据，使用 map 会原封不动把对象传回来
                 .flatMap(user -> userDao.delete(user).then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK))))
                 .defaultIfEmpty(new ResponseEntity(HttpStatus.NOT_FOUND));
     }
@@ -46,8 +50,27 @@ public class UserController {
     public Mono<ResponseEntity<User>> updateUser(@RequestBody User user) {
         return userDao.findById(user.getId())
                 .flatMap(u -> userDao.save(user))
-                .map(u->new ResponseEntity<User>(u,HttpStatus.OK))
-                .defaultIfEmpty(new ResponseEntity(HttpStatus.NOT_FOUND));
+                .map(u->new ResponseEntity<User>(u, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity (HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * 根据 ID 查找用户信息
+     * 存在返回用户信息，不存在返回 404
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<User>> findUserById(@PathVariable("id") String id) {
+        return userDao.findById(id)
+                .map(u -> new ResponseEntity<>(u, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping
+    public Mono<Integer> test() {
+        return Mono.just(1)
+                .map(i -> i+1)
+                .defaultIfEmpty(-1);
+    }
 }
